@@ -678,6 +678,9 @@ class Connection extends AbstractConnection implements ConnectionInterface
             if ($cm->isTransaction($this->poolName)) {
                 // Whether to release Or remove connection
                 $this->releaseOrRemove();
+                
+                // Print Error Sql
+                $this->printErrorSql($query, $bindings);
 
                 // Throw exception
                 throw new DbException($e->getMessage(), (int)$e->getCode(), $e);
@@ -694,8 +697,7 @@ class Connection extends AbstractConnection implements ConnectionInterface
             $this->releaseOrRemove();
 
             // Print Error Sql
-            $rawSql = $this->getRawSql($query, $bindings);
-            CLog::error('Fail err=<error>%s</error> sql=%s', $e->getMessage(), $rawSql);
+            $this->printErrorSql($query, $bindings);
 
             // Throw exception
             throw new DbException($e->getMessage(), (int)$e->getCode(), $e);
@@ -703,6 +705,17 @@ class Connection extends AbstractConnection implements ConnectionInterface
 
         $this->pdoType = self::TYPE_DEFAULT;
         return $result;
+    }
+    
+    /**
+     * Print Error Sql
+     * @param string $sql
+     * @param array  $bindings
+     */
+    protected function printErrorSql(string $query, array $bindings):void
+    {
+        $rawSql = $this->getRawSql($query, $bindings);
+        CLog::error('Fail err=<error>%s</error> sql=%s', $e->getMessage(), $rawSql);
     }
 
     /**
